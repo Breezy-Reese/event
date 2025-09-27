@@ -1,0 +1,5 @@
+<h2>{{ event.title }}</h2>
+<p>{{ event.description }}</p>
+<p><strong>Location:</strong> {{ event.location }}</p>
+<p><strong>Date:</strong> {{ event.date }}</p>
+<a href="{% url 'register' event.id %}">Register</a>
