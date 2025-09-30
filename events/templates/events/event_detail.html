@@ -1,6 +1,93 @@
-<h1>{{ event.title }}</h1>
-<p>{{ event.description }}</p>
-<p><strong>Date:</strong> {{ event.date }}</p>
-<p><strong>Location:</strong> {{ event.location }}</p>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ event.title }} - Event Management</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+        .event-details { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        .form-group { margin: 15px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input { width: 100%; max-width: 400px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .message { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+    <a href="{% url 'home' %}">← Back to All Events</a>
+    
+    <div class="event-details">
+        <h1>{{ event.title }}</h1>
+        <p><strong>📅 Date & Time:</strong> {{ event.date|date:"F j, Y, g:i a" }}</p>
+        <p><strong>📍 Location:</strong> {{ event.location }}</p>
+        <p><strong>👥 Attendance:</strong> {{ event.registered_count }}/{{ event.max_attendees }} registered</p>
+        <p><strong>📝 Description:</strong></p>
+        <p>{{ event.description|linebreaks }}</p>
+    </div>
 
-<a href="{% url 'register_event' event.id %}">Register</a>
+    {% if event.is_upcoming and event.registered_count < event.max_attendees %}
+    <div class="registration-form">
+        <h2>Register for this Event</h2>
+        <form id="registrationForm">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="name">Full Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <button type="submit">Register Now</button>
+        </form>
+        <div id="message"></div>
+    </div>
+    {% elif not event.is_upcoming %}
+    <div class="message error">
+        This event has already passed.
+    </div>
+    {% else %}
+    <div class="message error">
+        This event is full. Registration is closed.
+    </div>
+    {% endif %}
+
+    <script>
+        document.getElementById('registrationForm')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value
+            };
+
+            fetch(`/api/event/{{ event.id }}/register/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                const messageDiv = document.getElementById('message');
+                if (data.id) {
+                    messageDiv.innerHTML = 
+                        '<div class="message success">✅ Registration successful! We look forward to seeing you at the event.</div>';
+                    document.getElementById('registrationForm').reset();
+                } else {
+                    messageDiv.innerHTML = 
+                        `<div class="message error">❌ Error: ${data.error || 'Registration failed. Please try again.'}</div>`;
+                }
+            })
+            .catch(error => {
+                document.getElementById('message').innerHTML = 
+                    '<div class="message error">❌ Registration failed. Please check your connection and try again.</div>';
+            });
+        });
+    </script>
+</body>
+</html>

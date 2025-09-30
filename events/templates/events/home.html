@@ -1,8 +1,32 @@
-<h1>Upcoming Events</h1>
-<ul>
-  {% for event in events %}
-    <li>
-      <a href="{% url 'event_detail' event.id %}">{{ event.title }}</a> - {{ event.date }}
-    </li>
-  {% endfor %}
-</ul>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Event Management System</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+        .event { border: 1px solid #ddd; padding: 20px; margin: 20px 0; border-radius: 8px; }
+        .upcoming { background-color: #f8f9fa; border-left: 4px solid #007bff; }
+        .event h2 { margin-top: 0; color: #333; }
+        .event-meta { color: #666; font-size: 0.9em; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>🎉 Upcoming Events</h1>
+    
+    {% for event in events %}
+    <div class="event {% if event.is_upcoming %}upcoming{% endif %}">
+        <h2><a href="{% url 'event_detail' event.id %}">{{ event.title }}</a></h2>
+        <div class="event-meta">
+            <p><strong>📅 Date:</strong> {{ event.date|date:"F j, Y, g:i a" }}</p>
+            <p><strong>📍 Location:</strong> {{ event.location }}</p>
+            <p><strong>👥 Registered:</strong> {{ event.registered_count }}/{{ event.max_attendees }}</p>
+        </div>
+        <p>{{ event.description|truncatewords:50 }}</p>
+    </div>
+    {% empty %}
+    <p>No upcoming events scheduled. Check back later!</p>
+    {% endfor %}
+</body>
+</html>

@@ -1,44 +1,46 @@
-from django.shortcuts import render
-
-# Create your views here.
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404
+from django.utils import timezone
+from rest_framework import viewsets, status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 from .models import Event, Registration
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-import json
+from .serializers import EventSerializer, RegistrationSerializer
 
-# Homepage - list events
+# HTML Views
 def home(request):
-    events = Event.objects.all()
-    return render(request, "events/home.html", {"events": events})
+    events = Event.objects.filter(date__gte=timezone.now()).order_by('date')
+    return render(request, 'events/home.html', {'events': events})
 
-# Event detail
 def event_detail(request, event_id):
     event = get_object_or_404(Event, id=event_id)
-    return render(request, "events/detail.html", {"event": event})
+    return render(request, 'events/event_detail.html', {'event': event})
 
-# Registration form
-def register(request, event_id):
+# API Views
+class EventViewSet(viewsets.ModelViewSet):
+    queryset = Event.objects.all().order_by('date')
+    serializer_class = EventSerializer
+
+@api_view(['POST'])
+def register_for_event(request, event_id):
     event = get_object_or_404(Event, id=event_id)
-    if request.method == "POST":
-        name = request.POST["name"]
-        email = request.POST["email"]
-        Registration.objects.create(event=event, name=name, email=email)
-        return redirect("home")
-    return render(request, "events/register.html", {"event": event})
-
-
-# ---------------- API ---------------- #
-
-def api_events(request):
-    events = list(Event.objects.values())
-    return JsonResponse(events, safe=False)
-
-@csrf_exempt
-def api_register(request):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        event = get_object_or_404(Event, id=data["event_id"])
-        reg = Registration.objects.create(event=event, name=data["name"], email=data["email"])
-        return JsonResponse({"status": "success", "id": reg.id})
-    return JsonResponse({"error": "POST required"}, status=400)
+    
+    # Check if event is full
+    if event.registered_count >= event.max_attendees:
+        return Response(
+            {'error': 'This event is full'}, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    # Check if email already registered
+    if Registration.objects.filter(event=event, email=request.data.get('email')).exists():
+        return Response(
+            {'error': 'This email is already registered for this event'}, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    serializer = RegistrationSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save(event=event)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
