@@ -8,8 +8,13 @@ from .serializers import EventSerializer, RegistrationSerializer
 
 # HTML Views
 def home(request):
-    events = Event.objects.filter(date__gte=timezone.now()).order_by('date')
-    return render(request, 'events/home.html', {'events': events})
+    now = timezone.now()
+    upcoming = Event.objects.filter(date__gte=now).order_by('date')
+    past = Event.objects.filter(date__lt=now).order_by('-date')
+    return render(request, 'events/home.html', {
+        'upcoming': upcoming,
+        'past': past
+    })
 
 def event_detail(request, event_id):
     event = get_object_or_404(Event, id=event_id)
