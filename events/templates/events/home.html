@@ -3,81 +3,193 @@
 <head>
     <title>Event Management System</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; background: #fafafa; }
-        h1, h2, h3 { color: #333; }
-        .event { border: 1px solid #ddd; padding: 20px; margin: 20px 0; border-radius: 8px; background: #fff; }
-        .upcoming { background-color: #f8f9fa; border-left: 4px solid #007bff; }
-        .past { background-color: #fefefe; border-left: 4px solid #6c757d; opacity: 0.8; }
-        .event h2 { margin-top: 0; }
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background: #fafafa; 
+            line-height: 1.6;
+        }
+
+        header {
+            background: #007bff;
+            color: white;
+            padding: 40px 20px 20px;
+            text-align: center;
+        }
+        header h1 { margin: 0; font-size: 2.5em; }
+
+        nav {
+            margin-top: 20px;
+            background: #0056b3;
+            padding: 10px 0;
+            text-align: center;
+        }
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        nav a:hover { color: #ffc107; }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        h2, h3 { color: #333; }
+
+        .event { 
+            border: 1px solid #ddd; 
+            padding: 20px; 
+            margin: 20px 0; 
+            border-radius: 8px; 
+            background: #fff; 
+        }
+        .upcoming { border-left: 4px solid #007bff; }
+        .past { border-left: 4px solid #6c757d; opacity: 0.9; }
         .event-meta { color: #666; font-size: 0.9em; }
-        a { color: #007bff; text-decoration: none; }
-        a:hover { text-decoration: underline; }
-        .section { margin-top: 50px; padding: 20px; background: #fff; border-radius: 8px; border: 1px solid #ddd; }
+
+        .section { 
+            display: none; /* hide all sections initially */
+            padding: 20px; 
+            background: #fff; 
+            border-radius: 8px; 
+            border: 1px solid #ddd; 
+            margin-top: 40px;
+        }
+
+        .home-welcome { text-align: center; margin: 60px 0; }
+        .home-welcome h2 { font-size: 2.5em; color: #007bff; margin-bottom: 30px; }
+        .home-welcome img { max-width: 100%; height: auto; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); }
+
         .values ul { list-style: none; padding: 0; }
         .values li { margin: 10px 0; padding-left: 20px; position: relative; }
         .values li::before { content: "✔"; position: absolute; left: 0; color: #007bff; }
+
+        footer {
+            background: #343a40;
+            color: #fff;
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 40px;
+        }
+        footer h2 { margin-bottom: 10px; font-size: 1.5em; }
+        footer p { margin: 5px 0; }
+        footer a { color: #ffc107; text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
-    <!-- Upcoming Events -->
-    <h1>🎉 Upcoming Events</h1>
-    {% for event in upcoming %}
-        <div class="event upcoming">
-            <h2><a href="{% url 'event_detail' event.id %}">{{ event.title }}</a></h2>
-            <div class="event-meta">
-                <p><strong>📅 Date:</strong> {{ event.date|date:"F j, Y, g:i a" }}</p>
-                <p><strong>📍 Location:</strong> {{ event.location }}</p>
-                <p><strong>👥 Registered:</strong> {{ event.registered_count }}/{{ event.max_attendees }}</p>
+
+    <header>
+        <h1>📅 Event Management System Dashboard</h1>
+        <nav>
+            <a onclick="showSection('home')">🏠 Home</a>
+            <a onclick="showSection('upcoming')">🎉 Upcoming Events</a>
+            <a onclick="showSection('past')">🕰 Past Events</a>
+            <a onclick="showSection('contact')">📬 Contact</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <!-- Home Section -->
+        <div class="section" id="home">
+            <div class="home-welcome">
+                <h2>Welcome to Our Event Management System!</h2>
+                <img src="your-image.jpg" alt="Exciting Event">
             </div>
-            <p>{{ event.description|truncatewords:50 }}</p>
-        </div>
-    {% empty %}
-        <p>No upcoming events scheduled. Check back later!</p>
-    {% endfor %}
-
-    <!-- Past Events -->
-    <h1>🕰 Past Events</h1>
-    {% for event in past %}
-        <div class="event past">
-            <h2><a href="{% url 'event_detail' event.id %}">{{ event.title }}</a></h2>
-            <div class="event-meta">
-                <p><strong>📅 Date:</strong> {{ event.date|date:"F j, Y, g:i a" }}</p>
-                <p><strong>📍 Location:</strong> {{ event.location }}</p>
-                <p><strong>👥 Registered:</strong> {{ event.registered_count }}/{{ event.max_attendees }}</p>
+            <div class="section" id="story-home">
+                <h2>📖 Our Story</h2>
+                <p>
+                    Welcome to our Event Management System! We started with a mission to bring people together
+                    through impactful events. From small community gatherings to large-scale conferences,
+                    our goal is to create memorable experiences that inspire and connect.
+                </p>
             </div>
-            <p>{{ event.description|truncatewords:50 }}</p>
+            <div class="section values" id="values-home">
+                <h2>💡 Our Core Values</h2>
+                <ul>
+                    <li>Integrity – We are honest and transparent in everything we do.</li>
+                    <li>Innovation – We embrace creativity to make each event unique.</li>
+                    <li>Collaboration – We believe great events happen through teamwork.</li>
+                    <li>Excellence – We strive to exceed expectations every time.</li>
+                </ul>
+            </div>
         </div>
-    {% empty %}
-        <p>No past events available yet.</p>
-    {% endfor %}
 
-    <!-- Our Story -->
-    <div class="section">
-        <h2>📖 Our Story</h2>
-        <p>
-            Welcome to our Event Management System! We started with a mission to bring people together
-            through impactful events. From small community gatherings to large-scale conferences,
-            our goal is to create memorable experiences that inspire and connect.
-        </p>
+        <!-- Upcoming Events Section -->
+        <div class="section" id="upcoming">
+            <h2>🎉 Upcoming Events</h2>
+            {% for event in upcoming %}
+                <div class="event upcoming">
+                    <h3><a href="{% url 'event_detail' event.id %}">{{ event.title }}</a></h3>
+                    <div class="event-meta">
+                        <p><strong>📅 Date:</strong> {{ event.date|date:"F j, Y, g:i a" }}</p>
+                        <p><strong>📍 Location:</strong> {{ event.location }}</p>
+                        <p><strong>👥 Registered:</strong> {{ event.registered_count }}/{{ event.max_attendees }}</p>
+                    </div>
+                    <p>{{ event.description|truncatewords:50 }}</p>
+                </div>
+            {% empty %}
+                <p>No upcoming events scheduled. Check back later!</p>
+            {% endfor %}
+        </div>
+
+        <!-- Past Events Section -->
+        <div class="section" id="past">
+            <h2>🕰 Past Events</h2>
+            {% for event in past %}
+                <div class="event past">
+                    <h3><a href="{% url 'event_detail' event.id %}">{{ event.title }}</a></h3>
+                    <div class="event-meta">
+                        <p><strong>📅 Date:</strong> {{ event.date|date:"F j, Y, g:i a" }}</p>
+                        <p><strong>📍 Location:</strong> {{ event.location }}</p>
+                        <p><strong>👥 Registered:</strong> {{ event.registered_count }}/{{ event.max_attendees }}</p>
+                    </div>
+                    <p>{{ event.description|truncatewords:50 }}</p>
+                </div>
+            {% empty %}
+                <p>No past events available yet.</p>
+            {% endfor %}
+        </div>
+
+        <!-- Contact Section -->
+        <div class="section" id="contact">
+            <h2>📬 Get in Touch</h2>
+            <p>Have questions or want to collaborate with us? Reach out anytime!</p>
+            <p><strong>Email:</strong> <a href="mailto:basil59mutuku@gmail.com">basil59mutuku@gmail.com</a></p>
+            <p><strong>Phone:</strong> +254 768 378 553</p>
+        </div>
     </div>
 
-    <!-- Core Values -->
-    <div class="section values">
-        <h2>💡 Our Core Values</h2>
-        <ul>
-            <li>Integrity – We are honest and transparent in everything we do.</li>
-            <li>Innovation – We embrace creativity to make each event unique.</li>
-            <li>Collaboration – We believe great events happen through teamwork.</li>
-            <li>Excellence – We strive to exceed expectations every time.</li>
-        </ul>
-    </div>
+    <footer>
+        &copy; 2025 Event Management System
+    </footer>
 
-    <!-- Contact Section -->
-    <div class="section">
-        <h2>📬 Get in Touch</h2>
-        <p>Have questions or want to collaborate with us? Reach out anytime!</p>
-        <p><strong>Email:</strong> info@eventsystem.com</p>
-        <p><strong>Phone:</strong> +254 712 345 678</p>
-    </div>
+    <script>
+        // Function to show only the selected section
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(sec => sec.style.display = 'none');
+            document.getElementById(sectionId).style.display = 'block';
+
+            // If Home, show story and values inside it
+            if(sectionId === 'home') {
+                document.getElementById('story-home').style.display = 'block';
+                document.getElementById('values-home').style.display = 'block';
+            }
+        }
+
+        // Show Home by default on page load
+        window.onload = function() {
+            showSection('home');
+        }
+    </script>
+
 </body>
 </html>
